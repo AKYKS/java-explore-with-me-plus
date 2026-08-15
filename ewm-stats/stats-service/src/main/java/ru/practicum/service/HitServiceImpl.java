@@ -23,7 +23,7 @@ import static java.lang.String.format;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Transactional(readOnly = true)
-public class HitServiceImpl implements HitService{
+public class HitServiceImpl implements HitService {
     static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     HitRepository hitRepository;
 

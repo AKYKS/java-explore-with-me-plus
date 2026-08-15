@@ -34,7 +34,7 @@ public class HitController {
     }
 
     @GetMapping("/stats")
-    public List<ViewStatsDto> getStats( @RequestParam String start,
+    public List<ViewStatsDto> getStats(@RequestParam String start,
                                         @RequestParam String end,
                                         @RequestParam(required = false) List<String> uris,
                                         @RequestParam(defaultValue = "false") boolean unique) {

@@ -38,7 +38,7 @@ public class StatsClient {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<EndpointHitDto> request = new HttpEntity<>(hitDto, headers);
-        restTemplate.postForEntity(format("%s/hit", serverUrl), hitDto, Void.class);
+        restTemplate.postForEntity(format("%s/hit", serverUrl), request, Void.class);
     }
 
     public List<ViewStatsDto> getStats(String start, String end, List<String> uris, Boolean unique) {
