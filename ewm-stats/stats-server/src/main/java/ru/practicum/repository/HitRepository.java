@@ -23,7 +23,7 @@ public interface HitRepository extends JpaRepository<Hit, Long> {
                                         @Param("uris") List<String> uris);
 
     @Query("""
-            SELECT new ru.practicum.ViewStatsDto(h.app, h.uri, COUNT(DISTINCT h.ip))
+            SELECT new ru.practicum.ViewStatsDto(h.app, h.uri, COUNT(h.id))
             FROM Hit h
             WHERE h.timestamp BETWEEN :start AND :end AND (:uris IS NULL OR h.uri IN :uris)
             GROUP BY h.app, h.uri
