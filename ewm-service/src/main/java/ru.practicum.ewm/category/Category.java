@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import ru.practicum.ewm.event.Event;
+import ru.practicum.ewm.event.model.Event;
 
 import java.util.ArrayList;
 import java.util.List;

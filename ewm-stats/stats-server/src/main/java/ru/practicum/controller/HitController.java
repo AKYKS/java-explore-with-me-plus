@@ -22,7 +22,7 @@ public class HitController {
     HitService hitService;
 
     private LocalDateTime parseDateTime(String value) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
         return LocalDateTime.parse(value, formatter);
     }
 
@@ -35,9 +35,9 @@ public class HitController {
 
     @GetMapping("/stats")
     public List<ViewStatsDto> getStats(@RequestParam String start,
-                                        @RequestParam String end,
-                                        @RequestParam(required = false) List<String> uris,
-                                        @RequestParam(defaultValue = "false") boolean unique) {
+                                       @RequestParam String end,
+                                       @RequestParam(required = false) List<String> uris,
+                                       @RequestParam(defaultValue = "false") boolean unique) {
         log.info("Запрос на получение статистики по посещениям");
         return hitService.getStats(parseDateTime(start), parseDateTime(end), uris, unique);
     }

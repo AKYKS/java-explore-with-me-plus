@@ -2,7 +2,7 @@ package ru.practicum.ewm.user;
 
 import jakarta.persistence.*;
 import lombok.*;
-import ru.practicum.ewm.event.Event;
+import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.request.Request;
 
 import java.util.ArrayList;
