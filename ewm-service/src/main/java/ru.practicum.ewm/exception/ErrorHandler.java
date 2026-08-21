@@ -15,6 +15,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.lang.String.format;
+
 @RestControllerAdvice
 public class ErrorHandler {
 
@@ -121,6 +123,17 @@ public class ErrorHandler {
                 "Произошла непредвиденная ошибка.",
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 Collections.singletonList(e.getMessage())
+        );
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError handleValidation(final ValidationException exception) {
+        return buildApiError(
+                exception.getMessage(),
+                "Ошибка с входным параметром.",
+                HttpStatus.BAD_REQUEST,
+                Collections.singletonList(exception.getMessage())
         );
     }
 
