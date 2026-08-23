@@ -25,7 +25,7 @@ import static java.lang.String.format;
 public class StatsClient {
     static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
     final RestTemplate restTemplate;
-    @Value("${stats-server.url:http://localhost:9090}")
+    @Value("${client.url}")
     String serverUrl;
 
     public void saveHit(String app, String uri, String ip) {
