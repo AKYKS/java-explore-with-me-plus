@@ -23,6 +23,7 @@ public class Compilation {
     String title;
     @Column(nullable = false)
     Boolean pinned;
+    @Builder.Default
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "compilation_events",
     joinColumns = @JoinColumn(name = "compilation_id"),
