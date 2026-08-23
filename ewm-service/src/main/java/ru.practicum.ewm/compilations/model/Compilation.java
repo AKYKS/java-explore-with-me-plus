@@ -3,7 +3,7 @@ package ru.practicum.ewm.compilations.model;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import ru.practicum.ewm.event.Event;
+import ru.practicum.ewm.event.model.Event;
 
 import java.util.LinkedHashSet;
 import java.util.Set;

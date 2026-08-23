@@ -8,9 +8,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import ru.practicum.StatsClient;
 import ru.practicum.ViewStatsDto;
-import ru.practicum.ewm.event.Event;
+import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.event.dto.EventShortDto;
-import ru.practicum.ewm.event.mapper.EventMapper;
+import ru.practicum.ewm.event.mappers.EventMapper;
 import ru.practicum.ewm.request.Request;
 import ru.practicum.ewm.request.RequestRepository;
 

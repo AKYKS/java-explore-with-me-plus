@@ -1,7 +1,7 @@
-package ru.practicum.ewm.event.mapper;
+package ru.practicum.ewm.event.mappers;
 
 import ru.practicum.ewm.category.CategoryMapper;
-import ru.practicum.ewm.event.Event;
+import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.event.dto.EventShortDto;
 import ru.practicum.ewm.user.UserMapper;
 

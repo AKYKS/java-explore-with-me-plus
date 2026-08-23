@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.compilations.dto.CompilationDto;
 import ru.practicum.ewm.compilations.model.Compilation;
 import ru.practicum.ewm.compilations.repository.CompilationRepository;
-import ru.practicum.ewm.event.Event;
+import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.event.service.EventService;
 import ru.practicum.ewm.exception.NotFoundException;
 import ru.practicum.ewm.exception.ValidationException;
