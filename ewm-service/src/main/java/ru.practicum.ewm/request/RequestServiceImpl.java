@@ -3,6 +3,7 @@ package ru.practicum.ewm.request;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.ewm.event.enums.EventState;
 import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.event.repository.EventRepository;
 import ru.practicum.ewm.exception.ConflictException;
@@ -78,7 +79,7 @@ public class RequestServiceImpl implements RequestService {
             throw new ConflictException("Initiator can't create request for own event");
         }
 
-        if (event.getState() != Event.EventState.PUBLISHED) {
+        if (event.getState() != EventState.PUBLISHED) {
             throw new ConflictException("Can't participate in unpublished event");
         }
 

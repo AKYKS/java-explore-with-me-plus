@@ -4,6 +4,7 @@ package ru.practicum.ewm.event.model;
 import jakarta.persistence.*;
 import lombok.*;
 import ru.practicum.ewm.category.Category;
+import ru.practicum.ewm.event.enums.EventState;
 import ru.practicum.ewm.user.User;
 
 import java.time.LocalDateTime;
@@ -43,11 +44,8 @@ public class Event {
     @Column(name = "event_date", nullable = false)
     private LocalDateTime eventDate;
 
-    @Column(name = "location_lat", nullable = false)
-    private Float locationLat;
-
-    @Column(name = "location_lon", nullable = false)
-    private Float locationLon;
+    @Embedded
+    private Location location;
 
     @Column(name = "paid", nullable = false)
     private Boolean paid;
@@ -61,10 +59,4 @@ public class Event {
     @Enumerated(EnumType.STRING)
     @Column(name = "state", nullable = false, length = 20)
     private EventState state;
-
-    public enum EventState {
-        PENDING,
-        PUBLISHED,
-        CANCELED
-    }
 }
