@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.category.dto.CategoryResponseDto;
 
@@ -12,6 +13,7 @@ import java.util.List;
 @RestController
 @Slf4j
 @RequiredArgsConstructor
+@Validated
 @RequestMapping("/categories")
 public class CategoryControllerPublic {
     private final CategoryService categoryService;
