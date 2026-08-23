@@ -4,7 +4,20 @@ import ru.practicum.ewm.category.CategoryMapper;
 import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.event.dto.EventShortDto;
 import ru.practicum.ewm.user.UserMapper;
+import org.springframework.stereotype.Component;
+import ru.practicum.ewm.category.Category;
+import ru.practicum.ewm.event.dto.EventFullDto;
+import ru.practicum.ewm.event.dto.LocationDto;
+import ru.practicum.ewm.event.dto.NewEventDto;
+import ru.practicum.ewm.event.enums.EventState;
+import ru.practicum.ewm.event.model.Location;
+import ru.practicum.ewm.user.User;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Component
 public class EventMapper {
 
     public static EventShortDto toEventShortDto(Event event) {
@@ -22,25 +35,7 @@ public class EventMapper {
                 .confirmedRequests(0L)
                 .views(0L)
                 .build();
-import org.springframework.stereotype.Component;
-import ru.practicum.ewm.category.Category;
-import ru.practicum.ewm.category.CategoryMapper;
-import ru.practicum.ewm.event.dto.EventFullDto;
-import ru.practicum.ewm.event.dto.EventShortDto;
-import ru.practicum.ewm.event.dto.LocationDto;
-import ru.practicum.ewm.event.dto.NewEventDto;
-import ru.practicum.ewm.event.enums.EventState;
-import ru.practicum.ewm.event.model.Event;
-import ru.practicum.ewm.event.model.Location;
-import ru.practicum.ewm.user.User;
-import ru.practicum.ewm.user.UserMapper;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
-
-@Component
-public class EventMapper {
+    }
 
     public Event toEntity(NewEventDto dto, Category category, User initiator) {
         if (dto == null) {
@@ -75,7 +70,7 @@ public class EventMapper {
                 event.getEventDate(),
                 event.getPaid(),
                 CategoryMapper.toCategoryDto(event.getCategory()),
-                UserMapper.toResponseDto(event.getInitiator()),
+                UserMapper.toUserShortDto(event.getInitiator()),
                 null,
                 null
         );
@@ -93,7 +88,7 @@ public class EventMapper {
                 event.getEventDate(),
                 event.getPaid(),
                 CategoryMapper.toCategoryDto(event.getCategory()),
-                UserMapper.toResponseDto(event.getInitiator()),
+                UserMapper.toUserShortDto(event.getInitiator()),
                 confirmedRequests != null ? confirmedRequests : 0L,
                 views != null ? views : 0L
         );
