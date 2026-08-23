@@ -54,7 +54,7 @@ public class EventServiceImpl implements EventService {
     private static final String PUBLIC_APP = "ewm-service";
     private static final DateTimeFormatter FORMATTER =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    private final static LocalDateTime STATS_BEGIN =
+    private static final LocalDateTime STATS_BEGIN =
             LocalDateTime.of(2000, 1, 1, 0, 0);
 
     @Override
