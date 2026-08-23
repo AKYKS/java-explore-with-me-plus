@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.event.dto.EventFullDto;
 import ru.practicum.ewm.event.dto.EventShortDto;
@@ -16,8 +17,9 @@ import ru.practicum.ewm.request.dto.RequestResponseDto;
 
 import java.util.List;
 
-@Controller
+@RestController
 @RequestMapping(path = "/users/{userId}/events")
+@Validated
 public class EventUserController {
 
     private final EventService eventService;
