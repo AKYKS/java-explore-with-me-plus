@@ -2,12 +2,14 @@ package ru.practicum.ewm.event.services;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestClientException;
 import ru.practicum.StatsClient;
 import ru.practicum.ViewStatsDto;
 import ru.practicum.ewm.category.Category;
@@ -35,6 +37,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 @Transactional
 public class EventServiceImpl implements EventService {
@@ -48,6 +51,11 @@ public class EventServiceImpl implements EventService {
 
     private static final int MIN_HOURS_BEFORE_EVENT = 2;
     private static final String APP_NAME = "ewm-main";
+    private static final String PUBLIC_APP = "ewm-service";
+    private static final DateTimeFormatter FORMATTER =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private final static LocalDateTime STATS_BEGIN =
+            LocalDateTime.of(2000, 1, 1, 0, 0);
 
     @Override
     public EventFullDto createEvent(Long userId, NewEventDto dto) {
@@ -306,6 +314,66 @@ public class EventServiceImpl implements EventService {
         Long views = getViews("/events/" + id);
 
         return eventMapper.toFullDto(event, confirmedRequests, views);
+    }
+
+    @Override
+    public List<EventShortDto> toShortDtos(List<Event> events) {
+        Map<Long, Long> views = loadViewsSafely(events);
+        return events.stream()
+                .map(event -> toShortDto(event, views.getOrDefault(event.getId(), 0L)))
+                .toList();
+    }
+
+    private Map<Long, Long> loadViews(List<Event> events) {
+        if (events.isEmpty()) {
+            return Map.of();
+        }
+        List<String> uris = events.stream()
+                .map(event -> "/events/" + event.getId())
+                .toList();
+        List<ViewStatsDto> stats = statsClient.getStats(
+                STATS_BEGIN.format(FORMATTER),
+                LocalDateTime.now().plusSeconds(1).format(FORMATTER),
+                uris,
+                true
+        );
+        Map<Long, Long> result = new HashMap<>();
+        for (ViewStatsDto stat : stats) {
+            if (!PUBLIC_APP.equals(stat.getApp())) {
+                continue;
+            }
+
+            String prefix = "/events/";
+            if (stat.getUri() != null && stat.getUri().startsWith(prefix)) {
+                try {
+                    long eventId = Long.parseLong(stat.getUri().substring(prefix.length()));
+                    result.put(eventId, stat.getHits());
+                } catch (NumberFormatException ignored) {
+                    // Statistics for unrelated URIs are ignored.
+                }
+            }
+        }
+        return result;
+    }
+
+    private Map<Long, Long> loadViewsSafely(List<Event> events) {
+        try {
+            return loadViews(events);
+        } catch (RestClientException exception) {
+            log.warn("Stats-server недоступен", exception);
+            return Map.of();
+        }
+    }
+
+    private long confirmedRequests(Long eventId) {
+        return requestRepository.countByEventIdAndStatus(eventId, Request.Status.CONFIRMED);
+    }
+
+    private EventShortDto toShortDto(Event event, Long views) {
+        EventShortDto dto = EventMapper.toEventShortDto(event);
+        dto.setConfirmedRequests(confirmedRequests(event.getId()));
+        dto.setViews(views);
+        return dto;
     }
 
     private void updateEventFields(Event event, UpdateEventDto dto) {

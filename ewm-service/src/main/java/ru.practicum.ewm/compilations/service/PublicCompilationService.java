@@ -13,7 +13,7 @@ import ru.practicum.ewm.compilations.dto.CompilationDto;
 import ru.practicum.ewm.compilations.model.Compilation;
 import ru.practicum.ewm.compilations.repository.CompilationRepository;
 import ru.practicum.ewm.event.enums.EventState;
-import ru.practicum.ewm.event.service.EventService;
+import ru.practicum.ewm.event.services.EventService;
 import ru.practicum.ewm.exception.NotFoundException;
 import ru.practicum.ewm.exception.ValidationException;
 

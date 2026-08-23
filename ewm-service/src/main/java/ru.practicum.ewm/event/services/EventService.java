@@ -4,11 +4,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import ru.practicum.ewm.event.dto.*;
 import ru.practicum.ewm.event.enums.EventSort;
 import ru.practicum.ewm.event.enums.EventState;
+import ru.practicum.ewm.event.model.Event;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 public interface EventService {
+
+    List<EventShortDto> toShortDtos(List<Event> events);
 
     EventFullDto createEvent(Long userId, NewEventDto dto);
 
