@@ -124,6 +124,17 @@ public class ErrorHandler {
         );
     }
 
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError handleValidation(final ValidationException exception) {
+        return buildApiError(
+                exception.getMessage(),
+                "Ошибка с входным параметром.",
+                HttpStatus.BAD_REQUEST,
+                Collections.singletonList(exception.getMessage())
+        );
+    }
+
     private ApiError buildApiError(String message, String reason, HttpStatus status, List<String> errors) {
         return ApiError.builder()
                 .message(message)
