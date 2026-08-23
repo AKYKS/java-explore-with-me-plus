@@ -5,6 +5,9 @@ import ru.practicum.ewm.event.dto.*;
 import ru.practicum.ewm.event.enums.EventSort;
 import ru.practicum.ewm.event.enums.EventState;
 import ru.practicum.ewm.event.model.Event;
+import ru.practicum.ewm.event.model.EventRequestStatusUpdateRequest;
+import ru.practicum.ewm.event.model.EventRequestStatusUpdateResult;
+import ru.practicum.ewm.request.dto.RequestResponseDto;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -35,4 +38,8 @@ public interface EventService {
     void saveHit(HttpServletRequest request);
 
     EventFullDto getPublicEventById(Long id, HttpServletRequest request);
+
+    EventRequestStatusUpdateResult updateRequestStatusesPrivate(Long userId, Long eventId, EventRequestStatusUpdateRequest updateRequest);
+
+    List<RequestResponseDto> getRequestsByEventPrivate(Long userId, Long eventId);
 }

@@ -20,11 +20,15 @@ import ru.practicum.ewm.event.enums.EventSort;
 import ru.practicum.ewm.event.enums.EventState;
 import ru.practicum.ewm.event.mappers.EventMapper;
 import ru.practicum.ewm.event.model.Event;
+import ru.practicum.ewm.event.model.EventRequestStatusUpdateRequest;
+import ru.practicum.ewm.event.model.EventRequestStatusUpdateResult;
 import ru.practicum.ewm.event.repository.EventRepository;
 import ru.practicum.ewm.exception.ConflictException;
 import ru.practicum.ewm.exception.NotFoundException;
 import ru.practicum.ewm.request.Request;
+import ru.practicum.ewm.request.RequestMapper;
 import ru.practicum.ewm.request.RequestRepository;
+import ru.practicum.ewm.request.dto.RequestResponseDto;
 import ru.practicum.ewm.user.User;
 import ru.practicum.ewm.user.UserRepository;
 
@@ -34,7 +38,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
 @Slf4j
@@ -102,7 +107,7 @@ public class EventServiceImpl implements EventService {
 
         return page.getContent().stream()
                 .map(eventMapper::toShortDto)
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
     @Override
@@ -216,7 +221,7 @@ public class EventServiceImpl implements EventService {
 
         Page<Event> page = eventRepository.searchEventsAdmin(
                 users,
-                states != null ? states.stream().map(Enum::name).collect(Collectors.toList()) : null,
+                states != null ? states.stream().map(Enum::name).collect(toList()) : null,
                 categories,
                 rangeStart,
                 rangeEnd,
@@ -229,7 +234,7 @@ public class EventServiceImpl implements EventService {
 
         List<Long> eventIds = page.getContent().stream()
                 .map(Event::getId)
-                .collect(Collectors.toList());
+                .collect(toList());
 
         Map<Long, Long> confirmedMap = getConfirmedRequestsMap(eventIds);
         Map<Long, Long> viewsMap = getViewsForEvents(eventIds);
@@ -240,7 +245,7 @@ public class EventServiceImpl implements EventService {
                     Long views = viewsMap.getOrDefault(event.getId(), 0L);
                     return eventMapper.toFullDto(event, confirmedRequests, views);
                 })
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
     @Override
@@ -275,7 +280,7 @@ public class EventServiceImpl implements EventService {
 
         List<Long> eventIds = page.getContent().stream()
                 .map(Event::getId)
-                .collect(Collectors.toList());
+                .collect(toList());
 
         Map<Long, Long> confirmedMap = getConfirmedRequestsMap(eventIds);
         Map<Long, Long> viewsMap = getViewsForEvents(eventIds);
@@ -286,7 +291,7 @@ public class EventServiceImpl implements EventService {
                     Long views = viewsMap.getOrDefault(event.getId(), 0L);
                     return eventMapper.toShortDto(event, confirmedRequests, views);
                 })
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
     @Override
@@ -477,7 +482,7 @@ public class EventServiceImpl implements EventService {
 
         List<String> uris = eventIds.stream()
                 .map(id -> "/events/" + id)
-                .collect(Collectors.toList());
+                .collect(toList());
 
         LocalDateTime start = LocalDateTime.now().minusYears(100);
         LocalDateTime end = LocalDateTime.now();
@@ -515,5 +520,92 @@ public class EventServiceImpl implements EventService {
         }
 
         return map;
+    }
+
+    @Override
+    public List<RequestResponseDto> getRequestsByEventPrivate(Long userId, Long eventId) {
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException("User was not found " + userId);
+        }
+
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Event was not found: " + eventId));
+
+        if (!event.getInitiator().getId().equals(userId)) {
+            throw new NotFoundException("User " + userId + " does not match the initiator " + event.getInitiator().getId());
+        }
+
+        List<Request> requests = requestRepository.findAllByEventId(eventId);
+
+        return requests.stream()
+                .map(RequestMapper::toResponseDto)
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public EventRequestStatusUpdateResult updateRequestStatusesPrivate(
+            Long userId, Long eventId,
+            EventRequestStatusUpdateRequest updateRequest) {
+
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException("User was not found " + userId);
+        }
+
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Event was not found: " + eventId));
+
+        if (!event.getInitiator().getId().equals(userId)) {
+            throw new NotFoundException("User " + userId + " does not match the initiator " + event.getInitiator().getId());
+        }
+
+        if (!event.getRequestModeration() || event.getParticipantLimit() == 0) {
+            throw new ConflictException("Event does not require request moderation");
+        }
+
+        Long confirmedRequestsCount = requestRepository.countByEventIdAndStatus(
+                eventId,
+                Request.Status.CONFIRMED
+        );
+
+        List<Request> requests = requestRepository.findAllByIdInAndEventId(updateRequest.getRequestIds(), eventId);
+
+        boolean hasNonPending = requests.stream()
+                .anyMatch(request -> request.getStatus() != Request.Status.PENDING);
+
+        if (hasNonPending) {
+            throw new ConflictException("All requests must have PENDING status");
+        }
+
+        if (updateRequest.getStatus() == Request.Status.CONFIRMED) {
+            return confirmation(event, requests, confirmedRequestsCount);
+        } else {
+            return rejection(requests);
+        }
+    }
+
+    private EventRequestStatusUpdateResult confirmation(Event event, List<Request> requests, Long confirmedRequestsCount) {
+        long limit = event.getParticipantLimit();
+        if (limit > 0 && confirmedRequestsCount + requests.size() > limit) {
+            throw new ConflictException("Participant limit exceeded");
+        }
+
+        requests.forEach(r -> r.setStatus(Request.Status.CONFIRMED));
+        requestRepository.saveAll(requests);
+
+        return new EventRequestStatusUpdateResult(requests.stream()
+                .filter(r -> r.getStatus() == Request.Status.CONFIRMED)
+                .map(RequestMapper::toResponseDto)
+                .toList(), Collections.emptyList());
+    }
+
+    private EventRequestStatusUpdateResult rejection(List<Request> requests) {
+        requests.forEach(r -> r.setStatus(Request.Status.REJECTED));
+        requestRepository.saveAll(requests);
+
+        return new EventRequestStatusUpdateResult(Collections.emptyList(), requests.stream()
+                .filter(r -> r.getStatus() == Request.Status.REJECTED)
+                .map(RequestMapper::toResponseDto)
+                .toList());
     }
 }

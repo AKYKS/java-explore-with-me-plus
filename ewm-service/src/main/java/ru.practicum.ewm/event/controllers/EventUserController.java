@@ -9,7 +9,10 @@ import ru.practicum.ewm.event.dto.EventFullDto;
 import ru.practicum.ewm.event.dto.EventShortDto;
 import ru.practicum.ewm.event.dto.NewEventDto;
 import ru.practicum.ewm.event.dto.UpdateEventDto;
+import ru.practicum.ewm.event.model.EventRequestStatusUpdateRequest;
+import ru.practicum.ewm.event.model.EventRequestStatusUpdateResult;
 import ru.practicum.ewm.event.services.EventService;
+import ru.practicum.ewm.request.dto.RequestResponseDto;
 
 import java.util.List;
 
@@ -59,5 +62,20 @@ public class EventUserController {
 
         EventFullDto event = eventService.updateEventByUser(userId, eventId, dto);
         return ResponseEntity.ok(event);
+    }
+
+    @GetMapping("/{eventId}/requests")
+    public List<RequestResponseDto> getRequestsByEvent(
+            @PathVariable Long userId,
+            @PathVariable Long eventId) {
+        return eventService.getRequestsByEventPrivate(userId, eventId);
+    }
+
+    @PatchMapping("/{eventId}/requests")
+    public EventRequestStatusUpdateResult updateRequestStatuses(
+            @PathVariable Long userId,
+            @PathVariable Long eventId,
+            @Valid @RequestBody EventRequestStatusUpdateRequest updateRequest) {
+        return eventService.updateRequestStatusesPrivate(userId, eventId, updateRequest);
     }
 }
