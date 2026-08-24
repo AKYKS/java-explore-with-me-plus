@@ -55,6 +55,10 @@ public class EventMapper {
         event.setCreated(LocalDateTime.now());
         event.setState(EventState.PENDING);
 
+        if (dto.getLocation() != null) {
+            event.setLocation(toLocation(dto.getLocation()));
+        }
+
         return event;
     }
 
@@ -113,7 +117,7 @@ public class EventMapper {
                 event.getState() != null ? event.getState().name() : null,
                 CategoryMapper.toCategoryDto(event.getCategory()),
                 UserMapper.toResponseDto(event.getInitiator()),
-                null,
+                toLocationDto(event.getLocation()),
                 confirmedRequests,
                 views
         );
@@ -138,5 +142,16 @@ public class EventMapper {
         location.setLat(dto.getLat());
         location.setLon(dto.getLon());
         return location;
+    }
+
+    public LocationDto toLocationDto(Location location) {
+        if (location == null) {
+            return null;
+        }
+
+        return new LocationDto(
+                location.getLat(),
+                location.getLon()
+        );
     }
 }
