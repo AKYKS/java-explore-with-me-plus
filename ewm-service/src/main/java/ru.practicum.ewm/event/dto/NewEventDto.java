@@ -1,10 +1,6 @@
 package ru.practicum.ewm.event.dto;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Future;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -27,19 +23,16 @@ public class NewEventDto {
     @Size(min = 20, max = 7000)
     private String description;
 
-    @NotNull(message = "Дата события не может быть пустой")
     @Future(message = "Дата события должна быть в будущем")
     private LocalDateTime eventDate;
 
-    @NotNull(message = "Категория должна быть указана")
     private Long category;
 
-    @NotNull
-    @Valid
-    private LocationDto locationDto;
+    private LocationDto location;
 
     private Boolean paid = false;
 
+    @PositiveOrZero(message = "Количество участников должно быть положительным")
     private Long participantLimit = 0L;
 
     private Boolean requestModeration = true;

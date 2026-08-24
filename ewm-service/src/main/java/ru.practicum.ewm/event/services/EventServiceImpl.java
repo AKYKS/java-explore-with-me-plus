@@ -157,7 +157,7 @@ public class EventServiceImpl implements EventService {
             }
         }
 
-        updateEventFields(event,dto);
+        updateEventFields(event, dto);
 
         Event updated = eventRepository.save(event);
 
@@ -254,6 +254,10 @@ public class EventServiceImpl implements EventService {
                                                LocalDateTime rangeStart, LocalDateTime rangeEnd,
                                                Boolean onlyAvailable, EventSort sort, Integer from,
                                                Integer size, HttpServletRequest request) {
+
+        if (rangeStart != null && rangeEnd != null && rangeStart.isAfter(rangeEnd)) {
+            throw new IllegalArgumentException("rangeStart не может быть позже rangeEnd");
+        }
 
         saveHit(request);
 
@@ -465,7 +469,7 @@ public class EventServiceImpl implements EventService {
         String endStr = end.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
 
         try {
-            List<ViewStatsDto> stats = statsClient.getStats(startStr, endStr, List.of(uri), false);
+            List<ViewStatsDto> stats = statsClient.getStats(startStr, endStr, List.of(uri), true);
             if (!stats.isEmpty()) {
                 return stats.get(0).getHits();
             }
