@@ -1,6 +1,5 @@
 package ru.practicum.ewm.event.model;
 
-
 import jakarta.persistence.*;
 import lombok.*;
 import ru.practicum.ewm.category.Category;
@@ -18,7 +17,7 @@ public class Event {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false, length = 120)
     private String title;
 
     @Column(nullable = false, length = 2000)
