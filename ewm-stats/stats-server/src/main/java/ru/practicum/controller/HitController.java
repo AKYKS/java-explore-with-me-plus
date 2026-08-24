@@ -22,7 +22,7 @@ public class HitController {
     HitService hitService;
 
     private LocalDateTime parseDateTime(String value) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         return LocalDateTime.parse(value, formatter);
     }
 
