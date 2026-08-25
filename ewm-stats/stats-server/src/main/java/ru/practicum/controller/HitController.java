@@ -16,8 +16,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.List;
 
-import static java.lang.String.format;
-
 @RestController
 @Slf4j
 @RequiredArgsConstructor
