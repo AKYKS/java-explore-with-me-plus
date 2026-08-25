@@ -8,11 +8,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.EndpointHitDto;
 import ru.practicum.ViewStatsDto;
+import ru.practicum.exception.ValidationException;
 import ru.practicum.service.HitService;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.List;
+
+import static java.lang.String.format;
 
 @RestController
 @Slf4j
@@ -21,9 +25,16 @@ import java.util.List;
 public class HitController {
     HitService hitService;
 
+    private static final DateTimeFormatter FLEXIBLE_FORMATTER =
+            new DateTimeFormatterBuilder()
+                    .appendPattern("yyyy-MM-dd")
+                    .appendOptional(new DateTimeFormatterBuilder().appendLiteral('T').toFormatter())
+                    .appendOptional(new DateTimeFormatterBuilder().appendLiteral(' ').toFormatter())
+                    .appendPattern("HH:mm:ss")
+                    .toFormatter();
+
     private LocalDateTime parseDateTime(String value) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        return LocalDateTime.parse(value, formatter);
+        return LocalDateTime.parse(value, FLEXIBLE_FORMATTER);
     }
 
     @PostMapping("/hit")
@@ -34,11 +45,15 @@ public class HitController {
     }
 
     @GetMapping("/stats")
-    public List<ViewStatsDto> getStats(@RequestParam String start,
-                                       @RequestParam String end,
+    public List<ViewStatsDto> getStats(@RequestParam(required = false) String start,
+                                       @RequestParam(required = false) String end,
                                        @RequestParam(required = false) List<String> uris,
                                        @RequestParam(defaultValue = "false") boolean unique) {
         log.info("Запрос на получение статистики по посещениям");
+        if (start == null || end == null) {
+            log.warn("Отсутствует одна из дат диапазона");
+            throw new ValidationException("Отсутствует одна из дат диапазона");
+        }
         return hitService.getStats(parseDateTime(start), parseDateTime(end), uris, unique);
     }
 }
