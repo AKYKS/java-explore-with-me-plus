@@ -1,15 +1,14 @@
 package ru.practicum.ewm.user.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Data
 @AllArgsConstructor
 @RequiredArgsConstructor
 @Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserShortResponseDto {
-    private Long id;
-    private String name;
+    Long id;
+    String name;
 }

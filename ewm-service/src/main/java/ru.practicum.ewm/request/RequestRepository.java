@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface RequestRepository extends JpaRepository<Request, Long> {
 
-    Long countByEventIdAndStatus(Long eventId, Request.Status status);
+    Long countByEventIdAndStatus(Long eventId, RequestStatus status);
 
     List<Request> findAllByEventId(Long eventId);
 
@@ -22,5 +22,5 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
     Optional<Request> findByIdAndRequesterId(Long requestId, Long requesterId);
 
     @Query("SELECT r.event.id, COUNT(r) FROM Request r WHERE r.event.id IN :eventIds AND r.status = :status GROUP BY r.event.id")
-    List<Object[]> countByEventIdInAndStatus(@Param("eventIds") List<Long> eventIds, @Param("status") Request.Status status);
+    List<Object[]> countByEventIdInAndStatus(@Param("eventIds") List<Long> eventIds, @Param("status") RequestStatus status);
 }

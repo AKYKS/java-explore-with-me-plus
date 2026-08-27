@@ -1,6 +1,8 @@
 package ru.practicum.ewm.user;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -14,16 +16,9 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserServiceImpl implements UserService {
-
-    private final UserRepository userRepository;
-
-    @Override
-    public UserResponseDto getUserById(Long userId) {
-        return userRepository.findById(userId)
-                .map(UserMapper::toResponseDto)
-                .orElseThrow(() -> new NotFoundException("User was not found: " + userId));
-    }
+    UserRepository userRepository;
 
     @Override
     @Transactional

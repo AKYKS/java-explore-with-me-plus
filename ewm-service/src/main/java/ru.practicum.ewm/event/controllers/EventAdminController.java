@@ -3,6 +3,9 @@ package ru.practicum.ewm.event.controllers;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -18,13 +21,10 @@ import java.util.List;
 @RestController
 @RequestMapping(path = "/admin/events")
 @Validated
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class EventAdminController {
-
-    private final EventService eventService;
-
-    public EventAdminController(EventService eventService) {
-        this.eventService = eventService;
-    }
+    EventService eventService;
 
     @GetMapping
     public ResponseEntity<List<EventFullDto>> searchEvents(
@@ -36,7 +36,8 @@ public class EventAdminController {
             @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
             @RequestParam(defaultValue = "10") @Positive Integer size) {
 
-        List<EventFullDto> events = eventService.searchEventsAdmin(users, states, categories, rangeStart, rangeEnd, from, size);
+        List<EventFullDto> events = eventService.searchEventsAdmin(users, states, categories, rangeStart, rangeEnd,
+                from, size);
         return ResponseEntity.ok(events);
     }
 

@@ -2,6 +2,7 @@ package ru.practicum.ewm.user;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.FieldDefaults;
 import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.request.Request;
 
@@ -15,23 +16,24 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    Long id;
 
     @Column(name = "name", nullable = false, length = 255)
-    private String name;
+    String name;
 
     @Column(name = "email", nullable = false, length = 512, unique = true)
-    private String email;
+    String email;
 
     @OneToMany(mappedBy = "initiator", cascade = CascadeType.ALL)
     @Builder.Default
-    private List<Event> events = new ArrayList<>();
+    List<Event> events = new ArrayList<>();
 
     @OneToMany(mappedBy = "requester", cascade = CascadeType.ALL)
     @Builder.Default
-    private List<Request> requests = new ArrayList<>();
+    List<Request> requests = new ArrayList<>();
 }

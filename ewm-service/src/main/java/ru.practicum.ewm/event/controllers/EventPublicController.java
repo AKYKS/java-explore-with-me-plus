@@ -3,6 +3,9 @@ package ru.practicum.ewm.event.controllers;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -18,13 +21,10 @@ import java.util.List;
 @RestController
 @RequestMapping(path = "/events")
 @Validated
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class EventPublicController {
-
-    private final EventService eventService;
-
-    public EventPublicController(EventService eventService) {
-        this.eventService = eventService;
-    }
+    EventService eventService;
 
     @GetMapping
     public ResponseEntity<List<EventShortDto>> getEvents(

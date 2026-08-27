@@ -1,10 +1,11 @@
 package ru.practicum.ewm.user;
 
-
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -17,8 +18,9 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/admin/users")
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserControllerAdmin {
-    private final UserService userService;
+    UserService userService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

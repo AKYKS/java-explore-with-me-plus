@@ -4,11 +4,9 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import ru.practicum.ewm.request.Request;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+import ru.practicum.ewm.request.RequestStatus;
 
 import java.util.List;
 
@@ -16,11 +14,12 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class EventRequestStatusUpdateRequest {
     @NotEmpty
-    private List<Long> requestIds;
+    List<Long> requestIds;
 
     @NotNull
     @Enumerated(EnumType.STRING)
-    private Request.Status status;
+    RequestStatus status;
 }

@@ -1,6 +1,8 @@
 package ru.practicum.ewm.request;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.event.enums.EventState;
@@ -18,11 +20,11 @@ import java.util.List;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 @Service
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RequestServiceImpl implements RequestService {
-    private final RequestRepository requestRepository;
-    private final EventRepository eventRepository;
-    private final UserRepository userRepository;
-
+    RequestRepository requestRepository;
+    EventRepository eventRepository;
+    UserRepository userRepository;
 
     @Override
     @Transactional
@@ -60,15 +62,15 @@ public class RequestServiceImpl implements RequestService {
         Request request = requestRepository.findByIdAndRequesterId(requestId, userId)
                 .orElseThrow(() -> new NotFoundException("Request with id " + requestId + " for user " + userId + " was not found"));
 
-        if (request.getStatus() == Request.Status.CANCELED) {
+        if (request.getStatus() == RequestStatus.CANCELED) {
             throw new ConflictException("Request already canceled");
         }
 
-        if (request.getStatus() == Request.Status.CONFIRMED) {
+        if (request.getStatus() == RequestStatus.CONFIRMED) {
             throw new ConflictException("Cannot cancel confirmed request");
         }
 
-        request.setStatus(Request.Status.CANCELED);
+        request.setStatus(RequestStatus.CANCELED);
         Request updatedRequest = requestRepository.save(request);
 
         return RequestMapper.toResponseDto(updatedRequest);
@@ -88,15 +90,16 @@ public class RequestServiceImpl implements RequestService {
         }
 
         if (event.getParticipantLimit() != 0 &&
-                event.getParticipantLimit() <= requestRepository.countByEventIdAndStatus(event.getId(), Request.Status.CONFIRMED)) {
+                event.getParticipantLimit() <= requestRepository.countByEventIdAndStatus(event.getId(),
+                        RequestStatus.CONFIRMED)) {
             throw new ConflictException("Participant limit reached");
         }
     }
 
     private Request buildRequest(User requester, Event event) {
-        Request.Status status = event.getRequestModeration() && event.getParticipantLimit() != 0
-                ? Request.Status.PENDING
-                : Request.Status.CONFIRMED;
+        RequestStatus status = event.getRequestModeration() && event.getParticipantLimit() != 0
+                ? RequestStatus.PENDING
+                : RequestStatus.CONFIRMED;
 
         return Request.builder()
                 .event(event)

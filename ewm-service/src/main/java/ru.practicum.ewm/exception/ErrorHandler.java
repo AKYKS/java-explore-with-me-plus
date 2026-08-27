@@ -1,5 +1,7 @@
 package ru.practicum.ewm.exception;
 
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
@@ -16,9 +18,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ErrorHandler {
-
-    private static final DateTimeFormatter TIMESTAMP_FORMATTER =
+    static DateTimeFormatter TIMESTAMP_FORMATTER =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @ExceptionHandler({NotFoundException.class})

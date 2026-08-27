@@ -39,7 +39,8 @@ public interface EventService {
 
     EventFullDto getPublicEventById(Long id, HttpServletRequest request);
 
-    EventRequestStatusUpdateResult updateRequestStatusesPrivate(Long userId, Long eventId, EventRequestStatusUpdateRequest updateRequest);
+    EventRequestStatusUpdateResult updateRequestStatusesPrivate(Long userId, Long eventId,
+                                                                EventRequestStatusUpdateRequest updateRequest);
 
     List<RequestResponseDto> getRequestsByEventPrivate(Long userId, Long eventId);
 }

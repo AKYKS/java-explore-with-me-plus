@@ -1,39 +1,42 @@
 package ru.practicum.ewm.event.dto;
 
 import jakarta.validation.constraints.*;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class NewEventDto {
     @NotBlank(message = "Заголовок не может быть пустым")
     @Size(min = 3, max = 120)
-    private String title;
+    String title;
 
     @NotBlank(message = "Аннотация не может быть пустой")
     @Size(min = 20, max = 2000)
-    private String annotation;
+    String annotation;
 
     @NotBlank(message = "Описание не может быть пустым")
     @Size(min = 20, max = 7000)
-    private String description;
+    String description;
 
     @Future(message = "Дата события должна быть в будущем")
-    private LocalDateTime eventDate;
+    LocalDateTime eventDate;
 
-    private Long category;
+    Long category;
 
-    private LocationDto location;
+    LocationDto location;
 
-    private Boolean paid = false;
+    Boolean paid = false;
 
     @PositiveOrZero(message = "Количество участников должно быть положительным")
-    private Long participantLimit = 0L;
+    Long participantLimit = 0L;
 
-    private Boolean requestModeration = true;
+    Boolean requestModeration = true;
 }

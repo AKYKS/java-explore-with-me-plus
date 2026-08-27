@@ -1,6 +1,9 @@
 package ru.practicum.ewm.event.controllers;
 
 import jakarta.validation.Valid;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -19,13 +22,10 @@ import java.util.List;
 @RestController
 @RequestMapping(path = "/users/{userId}/events")
 @Validated
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class EventUserController {
-
-    private final EventService eventService;
-
-    public EventUserController(EventService eventUserService) {
-        this.eventService = eventUserService;
-    }
+    EventService eventService;
 
     @PostMapping
     public ResponseEntity<EventFullDto> createEvent(

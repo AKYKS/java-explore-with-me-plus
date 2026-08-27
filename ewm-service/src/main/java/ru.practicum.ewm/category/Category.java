@@ -1,10 +1,8 @@
 package ru.practicum.ewm.category;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 import ru.practicum.ewm.event.model.Event;
 
 import java.util.ArrayList;
@@ -16,15 +14,16 @@ import java.util.List;
 @Entity
 @Table(name = "categories")
 @Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    Long id;
 
     @Column(name = "name", nullable = false, length = 255, unique = true)
-    private String name;
+    String name;
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
     @Builder.Default
-    private List<Event> events = new ArrayList<>();
+    List<Event> events = new ArrayList<>();
 }

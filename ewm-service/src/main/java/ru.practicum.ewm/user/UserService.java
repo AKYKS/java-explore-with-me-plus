@@ -7,8 +7,6 @@ import java.util.List;
 
 public interface UserService {
 
-    UserResponseDto getUserById(Long userId);
-
     UserResponseDto addUserAdmin(NewUserDto userDto);
 
     List<UserResponseDto> getUsersAdmin(List<Long> ids, Integer from, Integer size);

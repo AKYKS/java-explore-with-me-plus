@@ -1,9 +1,11 @@
 package ru.practicum.ewm.event.dto;
 
 import jakarta.validation.constraints.*;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import ru.practicum.ewm.event.enums.AdminStateAction;
 
 import java.time.LocalDateTime;
@@ -11,30 +13,31 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class UpdateEventAdminDto {
 
     @Size(min = 3, max = 120)
-    private String title;
+    String title;
 
     @Size(min = 20, max = 2000)
-    private String annotation;
+    String annotation;
 
     @Size(min = 20, max = 7000)
-    private String description;
+    String description;
 
     @Future(message = "Дата события должна быть в будущем")
-    private LocalDateTime eventDate;
+    LocalDateTime eventDate;
 
-    private Long category;
+    Long category;
 
-    private LocationDto location;
+    LocationDto location;
 
-    private Boolean paid;
+    Boolean paid;
 
     @PositiveOrZero(message = "Количество участников должно быть положительным")
-    private Long participantLimit;
+    Long participantLimit;
 
-    private Boolean requestModeration;
+    Boolean requestModeration;
 
-    private AdminStateAction stateAction;
+    AdminStateAction stateAction;
 }

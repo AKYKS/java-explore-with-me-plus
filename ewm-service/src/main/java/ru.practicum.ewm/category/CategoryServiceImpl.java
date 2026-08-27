@@ -1,6 +1,8 @@
 package ru.practicum.ewm.category;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -17,11 +19,11 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Transactional(readOnly = true)
 public class CategoryServiceImpl implements CategoryService {
-
-    private final CategoryRepository categoryRepository;
-    private final EventRepository eventRepository;
+    CategoryRepository categoryRepository;
+    EventRepository eventRepository;
 
     @Override
     @Transactional

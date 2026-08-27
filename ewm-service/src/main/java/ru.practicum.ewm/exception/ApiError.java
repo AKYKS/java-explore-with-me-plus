@@ -1,16 +1,19 @@
 package ru.practicum.ewm.exception;
 
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.experimental.FieldDefaults;
 
 import java.util.List;
 
 @Getter
 @Builder
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ApiError {
-    private final String message;
-    private final String reason;
-    private final String status;
-    private final String timestamp;
-    private final List<String> errors;
+    String message;
+    String reason;
+    String status;
+    String timestamp;
+    List<String> errors;
 }

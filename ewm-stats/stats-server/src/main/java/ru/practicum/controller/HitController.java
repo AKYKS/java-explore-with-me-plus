@@ -23,18 +23,6 @@ import java.util.List;
 public class HitController {
     HitService hitService;
 
-    private static final DateTimeFormatter FLEXIBLE_FORMATTER =
-            new DateTimeFormatterBuilder()
-                    .appendPattern("yyyy-MM-dd")
-                    .appendOptional(new DateTimeFormatterBuilder().appendLiteral('T').toFormatter())
-                    .appendOptional(new DateTimeFormatterBuilder().appendLiteral(' ').toFormatter())
-                    .appendPattern("HH:mm:ss")
-                    .toFormatter();
-
-    private LocalDateTime parseDateTime(String value) {
-        return LocalDateTime.parse(value, FLEXIBLE_FORMATTER);
-    }
-
     @PostMapping("/hit")
     @ResponseStatus(HttpStatus.CREATED)
     public void saveHit(@RequestBody EndpointHitDto hitDto) {
@@ -52,6 +40,6 @@ public class HitController {
             log.warn("Отсутствует одна из дат диапазона");
             throw new ValidationException("Отсутствует одна из дат диапазона");
         }
-        return hitService.getStats(parseDateTime(start), parseDateTime(end), uris, unique);
+        return hitService.getStats(start, end, uris, unique);
     }
 }

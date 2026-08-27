@@ -1,6 +1,8 @@
 package ru.practicum.ewm.request;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -12,8 +14,9 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 @RequestMapping("/users/{userId}/requests")
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RequestControllerPrivate {
-    private final RequestService requestService;
+    RequestService requestService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

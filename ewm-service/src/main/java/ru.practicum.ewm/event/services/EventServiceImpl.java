@@ -1,7 +1,9 @@
 package ru.practicum.ewm.event.services;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,6 +30,7 @@ import ru.practicum.ewm.exception.NotFoundException;
 import ru.practicum.ewm.request.Request;
 import ru.practicum.ewm.request.RequestMapper;
 import ru.practicum.ewm.request.RequestRepository;
+import ru.practicum.ewm.request.RequestStatus;
 import ru.practicum.ewm.request.dto.RequestResponseDto;
 import ru.practicum.ewm.user.User;
 import ru.practicum.ewm.user.UserRepository;
@@ -45,21 +48,21 @@ import static java.util.stream.Collectors.toList;
 @Slf4j
 @RequiredArgsConstructor
 @Transactional
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class EventServiceImpl implements EventService {
+    EventRepository eventRepository;
+    UserRepository userRepository;
+    CategoryRepository categoryRepository;
+    EventMapper eventMapper;
+    RequestRepository requestRepository;
+    StatsClient statsClient;
 
-    private final EventRepository eventRepository;
-    private final UserRepository userRepository;
-    private final CategoryRepository categoryRepository;
-    private final EventMapper eventMapper;
-    private final RequestRepository requestRepository;
-    private final StatsClient statsClient;
-
-    private static final int MIN_HOURS_BEFORE_EVENT = 2;
-    private static final String APP_NAME = "ewm-main";
-    private static final String PUBLIC_APP = "ewm-service";
-    private static final DateTimeFormatter FORMATTER =
+    static int MIN_HOURS_BEFORE_EVENT = 2;
+    static String APP_NAME = "ewm-main";
+    static String PUBLIC_APP = "ewm-service";
+    static DateTimeFormatter FORMATTER =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    private static final LocalDateTime STATS_BEGIN =
+    static LocalDateTime STATS_BEGIN =
             LocalDateTime.of(2000, 1, 1, 0, 0);
 
     @Override
@@ -94,8 +97,9 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public List<EventShortDto> getEventsByUser(Long userId, Integer from, Integer size) {
 
-        userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь с id " + userId + " не найден"));
+        if (!userRepository.existsById(userId)) {
+                throw new NotFoundException("Пользователь с id " + userId + " не найден");
+        }
 
         Pageable pageable = PageRequest.of(from / size, size, Sort.by(Sort.Direction.DESC, "created"));
 
@@ -114,8 +118,9 @@ public class EventServiceImpl implements EventService {
     @Transactional(readOnly = true)
     public EventFullDto getEventByUser(Long userId, Long eventId) {
 
-        userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь с id " + userId + " не найден"));
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException("Пользователь с id " + userId + " не найден");
+        }
 
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Событие с id " + eventId + " не найдено"));
@@ -125,7 +130,7 @@ public class EventServiceImpl implements EventService {
         }
 
         Long views = getViews("/events/" + eventId);
-        Long confirmedRequests = requestRepository.countByEventIdAndStatus(eventId, Request.Status.CONFIRMED);
+        Long confirmedRequests = requestRepository.countByEventIdAndStatus(eventId, RequestStatus.CONFIRMED);
 
         return eventMapper.toFullDto(event, confirmedRequests, views);
     }
@@ -135,8 +140,9 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public EventFullDto updateEventByUser(Long userId, Long eventId, UpdateEventDto dto) {
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь с id " + userId + " не найден"));
+        if (!userRepository.existsById(userId)) {
+                throw new NotFoundException("Пользователь с id " + userId + " не найден");
+        }
 
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Событие с id " + eventId + " не найдено"));
@@ -162,7 +168,7 @@ public class EventServiceImpl implements EventService {
         Event updated = eventRepository.save(event);
 
         Long views = getViews("/events/" + eventId);
-        Long confirmedRequests = requestRepository.countByEventIdAndStatus(eventId, Request.Status.CONFIRMED);
+        Long confirmedRequests = requestRepository.countByEventIdAndStatus(eventId, RequestStatus.CONFIRMED);
 
         return eventMapper.toFullDto(updated, confirmedRequests, views);
     }
@@ -318,7 +324,7 @@ public class EventServiceImpl implements EventService {
             throw new NotFoundException("Событие с id " + id + " не опубликовано");
         }
 
-        Long confirmedRequests = requestRepository.countByEventIdAndStatus(id, Request.Status.CONFIRMED);
+        Long confirmedRequests = requestRepository.countByEventIdAndStatus(id, RequestStatus.CONFIRMED);
 
         Long views = getViews("/events/" + id);
 
@@ -375,7 +381,7 @@ public class EventServiceImpl implements EventService {
     }
 
     private long confirmedRequests(Long eventId) {
-        return requestRepository.countByEventIdAndStatus(eventId, Request.Status.CONFIRMED);
+        return requestRepository.countByEventIdAndStatus(eventId, RequestStatus.CONFIRMED);
     }
 
     private EventShortDto toShortDto(Event event, Long views) {
@@ -516,7 +522,7 @@ public class EventServiceImpl implements EventService {
 
         List<Object[]> results = requestRepository.countByEventIdInAndStatus(
                 eventIds,
-                Request.Status.CONFIRMED
+                RequestStatus.CONFIRMED
         );
 
         for (Object[] row : results) {
@@ -569,46 +575,47 @@ public class EventServiceImpl implements EventService {
 
         Long confirmedRequestsCount = requestRepository.countByEventIdAndStatus(
                 eventId,
-                Request.Status.CONFIRMED
+                RequestStatus.CONFIRMED
         );
 
         List<Request> requests = requestRepository.findAllByIdInAndEventId(updateRequest.getRequestIds(), eventId);
 
         boolean hasNonPending = requests.stream()
-                .anyMatch(request -> request.getStatus() != Request.Status.PENDING);
+                .anyMatch(request -> request.getStatus() != RequestStatus.PENDING);
 
         if (hasNonPending) {
             throw new ConflictException("All requests must have PENDING status");
         }
 
-        if (updateRequest.getStatus() == Request.Status.CONFIRMED) {
+        if (updateRequest.getStatus() == RequestStatus.CONFIRMED) {
             return confirmation(event, requests, confirmedRequestsCount);
         } else {
             return rejection(requests);
         }
     }
 
-    private EventRequestStatusUpdateResult confirmation(Event event, List<Request> requests, Long confirmedRequestsCount) {
+    private EventRequestStatusUpdateResult confirmation(Event event, List<Request> requests,
+                                                        Long confirmedRequestsCount) {
         long limit = event.getParticipantLimit();
         if (limit > 0 && confirmedRequestsCount + requests.size() > limit) {
             throw new ConflictException("Participant limit exceeded");
         }
 
-        requests.forEach(r -> r.setStatus(Request.Status.CONFIRMED));
+        requests.forEach(r -> r.setStatus(RequestStatus.CONFIRMED));
         requestRepository.saveAll(requests);
 
         return new EventRequestStatusUpdateResult(requests.stream()
-                .filter(r -> r.getStatus() == Request.Status.CONFIRMED)
+                .filter(r -> r.getStatus() == RequestStatus.CONFIRMED)
                 .map(RequestMapper::toResponseDto)
                 .toList(), Collections.emptyList());
     }
 
     private EventRequestStatusUpdateResult rejection(List<Request> requests) {
-        requests.forEach(r -> r.setStatus(Request.Status.REJECTED));
+        requests.forEach(r -> r.setStatus(RequestStatus.REJECTED));
         requestRepository.saveAll(requests);
 
         return new EventRequestStatusUpdateResult(Collections.emptyList(), requests.stream()
-                .filter(r -> r.getStatus() == Request.Status.REJECTED)
+                .filter(r -> r.getStatus() == RequestStatus.REJECTED)
                 .map(RequestMapper::toResponseDto)
                 .toList());
     }
