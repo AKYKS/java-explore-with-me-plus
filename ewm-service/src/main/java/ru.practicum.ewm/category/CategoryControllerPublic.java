@@ -1,0 +1,43 @@
+package ru.practicum.ewm.category;
+
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+import ru.practicum.ewm.category.dto.CategoryResponseDto;
+
+import java.util.List;
+
+@RestController
+@Slf4j
+@RequiredArgsConstructor
+@Validated
+@RequestMapping("/categories")
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+public class CategoryControllerPublic {
+    CategoryService categoryService;
+
+    @GetMapping
+    public List<CategoryResponseDto> getCategories(
+            @RequestParam(defaultValue = "0")
+            @PositiveOrZero
+            Integer from,
+
+            @RequestParam(defaultValue = "10")
+            @Positive
+            Integer size) {
+
+        log.info("Getting categories with params {}, {}", from, size);
+        return categoryService.getCategoriesPublic(from, size);
+    }
+
+    @GetMapping("/{catId}")
+    public CategoryResponseDto getCategoryById(@PathVariable Long catId) {
+        log.info("Getting category by id: {}", catId);
+        return categoryService.getCategoryByIdPublic(catId);
+    }
+}

@@ -1,6 +1,5 @@
 package ru.practicum.service;
 
-import jakarta.validation.ValidationException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -9,11 +8,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.EndpointHitDto;
 import ru.practicum.ViewStatsDto;
+import ru.practicum.exception.ValidationException;
 import ru.practicum.model.Hit;
 import ru.practicum.repository.HitRepository;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.List;
 
 import static java.lang.String.format;
@@ -24,8 +25,18 @@ import static java.lang.String.format;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Transactional(readOnly = true)
 public class HitServiceImpl implements HitService {
-    static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    static DateTimeFormatter FORMATTER =
+            new DateTimeFormatterBuilder()
+                    .appendPattern("yyyy-MM-dd")
+                    .appendOptional(new DateTimeFormatterBuilder().appendLiteral('T').toFormatter())
+                    .appendOptional(new DateTimeFormatterBuilder().appendLiteral(' ').toFormatter())
+                    .appendPattern("HH:mm:ss")
+                    .toFormatter();
     HitRepository hitRepository;
+
+    private LocalDateTime parseDateTime(String value) {
+        return LocalDateTime.parse(value, FORMATTER);
+    }
 
     @Override
     @Transactional
@@ -40,20 +51,23 @@ public class HitServiceImpl implements HitService {
     }
 
     @Override
-    public List<ViewStatsDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
-        if (start != null && end != null && start.isAfter(end)) {
-            log.warn("Дата начала {} не может быть позже даты окончания {}", start, end);
-            throw new ValidationException(format("Дата начала %s не может быть позже даты окончания %s", start, end));
+    public List<ViewStatsDto> getStats(String start, String  end, List<String> uris, Boolean unique) {
+        LocalDateTime startDateTime = parseDateTime(start);
+        LocalDateTime endDateTime = parseDateTime(end);
+        if (startDateTime != null && endDateTime != null && startDateTime.isAfter(endDateTime)) {
+            log.warn("Дата начала {} не может быть позже даты окончания {}",startDateTime, endDateTime);
+            throw new ValidationException(format("Дата начала %s не может быть позже даты окончания %s", startDateTime,
+                    endDateTime));
         }
         boolean hasUris = uris == null || uris.isEmpty();
         if (Boolean.TRUE.equals(unique)) {
             return hasUris
-                    ? hitRepository.findStatsByRangeUniqueIp(start, end, null)
-                    : hitRepository.findStatsByRangeUniqueIp(start, end, uris);
+                    ? hitRepository.findStatsByRangeUniqueIp(startDateTime, endDateTime, null)
+                    : hitRepository.findStatsByRangeUniqueIp(startDateTime, endDateTime, uris);
         } else {
             return hasUris
-                    ? hitRepository.findStatsByRange(start, end, null)
-                    : hitRepository.findStatsByRange(start, end, uris);
+                    ? hitRepository.findStatsByRange(startDateTime, endDateTime, null)
+                    : hitRepository.findStatsByRange(startDateTime, endDateTime, uris);
         }
     }
 }

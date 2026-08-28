@@ -8,10 +8,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.EndpointHitDto;
 import ru.practicum.ViewStatsDto;
+import ru.practicum.exception.ValidationException;
 import ru.practicum.service.HitService;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @RestController
@@ -21,11 +20,6 @@ import java.util.List;
 public class HitController {
     HitService hitService;
 
-    private LocalDateTime parseDateTime(String value) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        return LocalDateTime.parse(value, formatter);
-    }
-
     @PostMapping("/hit")
     @ResponseStatus(HttpStatus.CREATED)
     public void saveHit(@RequestBody EndpointHitDto hitDto) {
@@ -34,11 +28,15 @@ public class HitController {
     }
 
     @GetMapping("/stats")
-    public List<ViewStatsDto> getStats(@RequestParam String start,
-                                        @RequestParam String end,
-                                        @RequestParam(required = false) List<String> uris,
-                                        @RequestParam(defaultValue = "false") boolean unique) {
+    public List<ViewStatsDto> getStats(@RequestParam(required = false) String start,
+                                       @RequestParam(required = false) String end,
+                                       @RequestParam(required = false) List<String> uris,
+                                       @RequestParam(defaultValue = "false") boolean unique) {
         log.info("Запрос на получение статистики по посещениям");
-        return hitService.getStats(parseDateTime(start), parseDateTime(end), uris, unique);
+        if (start == null || end == null) {
+            log.warn("Отсутствует одна из дат диапазона");
+            throw new ValidationException("Отсутствует одна из дат диапазона");
+        }
+        return hitService.getStats(start, end, uris, unique);
     }
 }
