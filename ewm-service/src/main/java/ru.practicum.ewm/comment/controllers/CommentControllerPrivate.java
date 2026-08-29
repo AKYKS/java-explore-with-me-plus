@@ -1,7 +1,9 @@
 package ru.practicum.ewm.comment.controllers;
 
 import jakarta.validation.Valid;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -9,14 +11,14 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.comment.dto.*;
 import ru.practicum.ewm.comment.services.CommentService;
 
-
 @RestController
 @RequestMapping("/users/{userId}/comments")
 @RequiredArgsConstructor
 @Slf4j
 @Validated
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CommentControllerPrivate {
-    private final CommentService commentService;
+    CommentService commentService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

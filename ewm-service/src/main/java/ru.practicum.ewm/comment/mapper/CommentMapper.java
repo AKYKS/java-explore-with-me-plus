@@ -1,8 +1,10 @@
-package ru.practicum.ewm.comment;
+package ru.practicum.ewm.comment.mapper;
 
 import lombok.experimental.UtilityClass;
+import ru.practicum.ewm.comment.model.Comment;
 import ru.practicum.ewm.comment.dto.CommentResponseDto;
 import ru.practicum.ewm.comment.dto.NewCommentDto;
+import ru.practicum.ewm.comment.model.CommentStatus;
 import ru.practicum.ewm.user.dto.UserShortResponseDto;
 
 import java.time.LocalDateTime;
@@ -13,7 +15,7 @@ public class CommentMapper {
         return Comment.builder()
                 .text(dto.getText())
                 .created(LocalDateTime.now())
-                .status(Comment.CommentStatus.PENDING)
+                .status(CommentStatus.PENDING)
                 .build();
     }
 

@@ -2,7 +2,9 @@ package ru.practicum.ewm.comment.controllers;
 
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -17,8 +19,9 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 @Validated
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CommentControllerAdmin {
-    private final CommentService commentService;
+    CommentService commentService;
 
     @GetMapping
     public List<CommentResponseDto> searchComments(

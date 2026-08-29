@@ -1,14 +1,17 @@
 package ru.practicum.ewm.comment.services;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.ewm.comment.Comment;
-import ru.practicum.ewm.comment.CommentMapper;
-import ru.practicum.ewm.comment.CommentRepository;
+import ru.practicum.ewm.comment.model.Comment;
+import ru.practicum.ewm.comment.mapper.CommentMapper;
+import ru.practicum.ewm.comment.model.CommentStatus;
+import ru.practicum.ewm.comment.repository.CommentRepository;
 import ru.practicum.ewm.comment.dto.*;
 import ru.practicum.ewm.event.enums.EventState;
 import ru.practicum.ewm.event.model.Event;
@@ -25,10 +28,11 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 @Transactional(readOnly = true)
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CommentServiceImpl implements CommentService {
-    private final CommentRepository commentRepository;
-    private final EventRepository eventRepository;
-    private final UserRepository userRepository;
+    CommentRepository commentRepository;
+    EventRepository eventRepository;
+    UserRepository userRepository;
 
     @Override
     public List<CommentResponseDto> getPublishedCommentsForEventPublic(Long eventId, Integer from, Integer size) {
@@ -36,7 +40,7 @@ public class CommentServiceImpl implements CommentService {
 
         Page<Comment> comments = commentRepository.findByEventIdAndStatus(
                 eventId,
-                Comment.CommentStatus.PUBLISHED,
+                CommentStatus.PUBLISHED,
                 PageRequest.of(from / size, size));
 
         return comments.getContent().stream()
@@ -51,7 +55,7 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = commentRepository.findByIdAndEventIdAndStatus(
                         commentId,
                         eventId,
-                        Comment.CommentStatus.PUBLISHED)
+                        CommentStatus.PUBLISHED)
                 .orElseThrow(() -> new NotFoundException("Comment not found or not published"));
 
         return CommentMapper.toResponseDto(comment);
@@ -81,8 +85,8 @@ public class CommentServiceImpl implements CommentService {
         validateUserIsAuthor(userId, comment);
         validateCommentNotRejected(comment);
 
-        if (comment.getStatus() == Comment.CommentStatus.PUBLISHED) {
-            comment.setStatus(Comment.CommentStatus.EDITED);
+        if (comment.getStatus() == CommentStatus.PUBLISHED) {
+            comment.setStatus(CommentStatus.EDITED);
         }
 
         comment.setText(commentDto.getText());
@@ -104,10 +108,10 @@ public class CommentServiceImpl implements CommentService {
     public List<CommentResponseDto> searchCommentsAdmin(
             List<Long> users, List<String> statuses, List<Long> events, Integer from, Integer size) {
 
-        List<Comment.CommentStatus> statusEnums = statuses != null ?
+        List<CommentStatus> statusEnums = statuses != null ?
                 statuses.stream()
                         .map(String::toUpperCase)
-                        .map(Comment.CommentStatus::valueOf)
+                        .map(CommentStatus::valueOf)
                         .toList() : null;
 
         Page<Comment> comments = commentRepository.searchComments(
@@ -127,7 +131,7 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = getCommentIfExists(commentId);
         validateCommentStatus(comment);
 
-        comment.setStatus(Comment.CommentStatus.PUBLISHED);
+        comment.setStatus(CommentStatus.PUBLISHED);
         return CommentMapper.toResponseDto(commentRepository.save(comment));
     }
 
@@ -137,7 +141,7 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = getCommentIfExists(commentId);
         validateCommentStatus(comment);
 
-        comment.setStatus(Comment.CommentStatus.CANCELED);
+        comment.setStatus(CommentStatus.CANCELED);
         return CommentMapper.toResponseDto(commentRepository.save(comment));
     }
 
@@ -182,13 +186,13 @@ public class CommentServiceImpl implements CommentService {
     }
 
     private void validateCommentNotRejected(Comment comment) {
-        if (comment.getStatus() == Comment.CommentStatus.CANCELED) {
+        if (comment.getStatus() == CommentStatus.CANCELED) {
             throw new ConflictException("Cannot modify rejected comment");
         }
     }
 
     private void validateCommentStatus(Comment comment) {
-        if (comment.getStatus() != Comment.CommentStatus.PENDING) {
+        if (comment.getStatus() != CommentStatus.PENDING) {
             throw new ConflictException("Only pending comments can be published or rejected");
         }
     }
